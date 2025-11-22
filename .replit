@@ -19,6 +19,10 @@ localPort = 35601
 externalPort = 3002
 
 [[ports]]
+localPort = 37669
+externalPort = 3003
+
+[[ports]]
 localPort = 40307
 externalPort = 3001
 
@@ -54,3 +58,6 @@ waitForPort = 5000
 
 [userenv.shared]
 ADMIN_SECRET = "optisolve-admin-2024-secure"
+
+[agent]
+integrations = ["google-mail:1.0.0"]

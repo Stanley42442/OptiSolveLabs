@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { updatePromoSlotsSchema, type PromoStatusResponse } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import { google } from "googleapis";
 
 // Require ADMIN_SECRET environment variable - fail fast if not set
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
@@ -11,6 +12,73 @@ if (!ADMIN_SECRET) {
     "ADMIN_SECRET environment variable is required for admin authentication. " +
     "Please set it before starting the server."
   );
+}
+
+// Gmail client setup
+let connectionSettings: any;
+
+async function getGmailAccessToken() {
+  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
+    return connectionSettings.settings.access_token;
+  }
+  
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY 
+    ? 'repl ' + process.env.REPL_IDENTITY 
+    : process.env.WEB_REPL_RENEWAL 
+    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+    : null;
+
+  if (!xReplitToken) {
+    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+  }
+
+  connectionSettings = await fetch(
+    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=google-mail',
+    {
+      headers: {
+        'Accept': 'application/json',
+        'X_REPLIT_TOKEN': xReplitToken
+      }
+    }
+  ).then(res => res.json()).then(data => data.items?.[0]);
+
+  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
+
+  if (!connectionSettings || !accessToken) {
+    throw new Error('Gmail not connected');
+  }
+  return accessToken;
+}
+
+async function getGmailClient() {
+  const accessToken = await getGmailAccessToken();
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({
+    access_token: accessToken
+  });
+  return google.gmail({ version: 'v1', auth: oauth2Client });
+}
+
+async function sendGmailEmail(to: string, subject: string, htmlBody: string) {
+  try {
+    const gmail = await getGmailClient();
+    const message = {
+      raw: Buffer.from(
+        `From: me\r\nTo: ${to}\r\nSubject: ${subject}\r\nContent-Type: text/html; charset="UTF-8"\r\n\r\n${htmlBody}`
+      ).toString('base64')
+    };
+    
+    await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: message
+    });
+    
+    console.log(`Email sent to ${to}`);
+  } catch (error) {
+    console.error("Failed to send Gmail:", error);
+    throw error;
+  }
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -28,8 +96,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid email address" });
       }
 
-      // Log the message (in production, this would be sent to email or database)
-      console.log(`Contact form submission: ${name} (${email}) - ${message}`);
+      // Send email notification to admin
+      const htmlBody = `
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+        <hr>
+        <p><em>Submitted at: ${new Date().toLocaleString()}</em></p>
+      `;
+
+      try {
+        await sendGmailEmail(email, `New Contact: ${name}`, htmlBody);
+      } catch (emailError) {
+        console.warn("Failed to send email, but form was received:", emailError);
+        // Don't fail the request if email fails - the form was still received
+      }
 
       res.json({
         success: true,
