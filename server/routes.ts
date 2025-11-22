@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { updatePromoSlotsSchema, type PromoStatusResponse } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
-import { google } from "googleapis";
+import { Resend } from "resend";
 
 // Require ADMIN_SECRET environment variable - fail fast if not set
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
@@ -14,75 +14,31 @@ if (!ADMIN_SECRET) {
   );
 }
 
-// Gmail client setup
-let connectionSettings: any;
+// Resend email service
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-async function getGmailAccessToken() {
-  // For Netlify deployment - use environment variable
-  if (process.env.GMAIL_ACCESS_TOKEN) {
-    return process.env.GMAIL_ACCESS_TOKEN;
+async function sendResendEmail(to: string, subject: string, htmlBody: string) {
+  if (!RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY environment variable not set");
   }
 
-  // For Replit development - use connector
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
-  }
-  
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY 
-    ? 'repl ' + process.env.REPL_IDENTITY 
-    : process.env.WEB_REPL_RENEWAL 
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-    : null;
-
-  if (!xReplitToken) {
-    throw new Error('Gmail not configured. Set GMAIL_ACCESS_TOKEN env var for Netlify deployment or use Replit connector.');
-  }
-
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=google-mail',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
-    }
-  ).then(res => res.json()).then(data => data.items?.[0]);
-
-  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
-
-  if (!connectionSettings || !accessToken) {
-    throw new Error('Gmail not connected');
-  }
-  return accessToken;
-}
-
-async function getGmailClient() {
-  const accessToken = await getGmailAccessToken();
-  const oauth2Client = new google.auth.OAuth2();
-  oauth2Client.setCredentials({
-    access_token: accessToken
-  });
-  return google.gmail({ version: 'v1', auth: oauth2Client });
-}
-
-async function sendGmailEmail(to: string, subject: string, htmlBody: string) {
   try {
-    const gmail = await getGmailClient();
-    const message = {
-      raw: Buffer.from(
-        `From: me\r\nTo: ${to}\r\nSubject: ${subject}\r\nContent-Type: text/html; charset="UTF-8"\r\n\r\n${htmlBody}`
-      ).toString('base64')
-    };
+    const resend = new Resend(RESEND_API_KEY);
     
-    await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: message
+    const result = await resend.emails.send({
+      from: "OptiSolve Labs <onboarding@resend.dev>",
+      to,
+      subject,
+      html: htmlBody,
     });
-    
-    console.log(`Email sent to ${to}`);
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    console.log(`Email sent to ${to} with ID: ${result.data?.id}`);
   } catch (error) {
-    console.error("Failed to send Gmail:", error);
+    console.error("Failed to send email via Resend:", error);
     throw error;
   }
 }
@@ -114,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
 
       try {
-        await sendGmailEmail("optisolvelabs@gmail.com", `New Contact Form Submission from ${name}`, htmlBody);
+        await sendResendEmail("optisolvelabs@gmail.com", `New Contact Form Submission from ${name}`, htmlBody);
       } catch (emailError) {
         console.warn("Failed to send email, but form was received:", emailError);
         // Don't fail the request if email fails - the form was still received

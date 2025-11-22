@@ -62,6 +62,7 @@ waitForPort = 5000
 
 [userenv.shared]
 ADMIN_SECRET = "optisolve-admin-2024-secure"
+RESEND_API_KEY = "re_eRKtdbah_HVMmChR6ywnPDyQn5QskkGv1"
 
 [agent]
 integrations = ["google-mail:1.0.0"]
