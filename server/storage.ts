@@ -13,6 +13,56 @@ export interface IStorage {
   updatePromoSlots(month: number, year: number, slots: number): Promise<PromoStatus>;
 }
 
+class MemStorage implements IStorage {
+  private users: Map<string, User> = new Map();
+  private promoStatuses: Map<string, PromoStatus> = new Map();
+
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.username === username);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = Math.random().toString(36).substring(7);
+    const user: User = { ...insertUser, id };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async getPromoStatus(month: number, year: number): Promise<PromoStatus | undefined> {
+    const key = `${month}-${year}`;
+    return this.promoStatuses.get(key);
+  }
+
+  async createPromoStatus(month: number, year: number, slots: number): Promise<PromoStatus> {
+    const key = `${month}-${year}`;
+    const status: PromoStatus = {
+      month,
+      year,
+      slotsRemaining: slots,
+      lastUpdated: new Date(),
+    };
+    this.promoStatuses.set(key, status);
+    return status;
+  }
+
+  async updatePromoSlots(month: number, year: number, slots: number): Promise<PromoStatus> {
+    const key = `${month}-${year}`;
+    const existing = this.promoStatuses.get(key);
+    
+    if (existing) {
+      existing.slotsRemaining = slots;
+      existing.lastUpdated = new Date();
+      return existing;
+    } else {
+      return await this.createPromoStatus(month, year, slots);
+    }
+  }
+}
+
 export class DBStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
@@ -65,11 +115,9 @@ export class DBStorage implements IStorage {
   }
 
   async updatePromoSlots(month: number, year: number, slots: number): Promise<PromoStatus> {
-    // First check if status exists
     const existing = await this.getPromoStatus(month, year);
     
     if (existing) {
-      // Update existing
       const result = await db
         .update(promoStatuses)
         .set({
@@ -86,10 +134,9 @@ export class DBStorage implements IStorage {
         lastUpdated: result[0].lastUpdated,
       };
     } else {
-      // Create new
       return await this.createPromoStatus(month, year, slots);
     }
   }
 }
 
-export const storage = new DBStorage();
+export const storage = new MemStorage();
