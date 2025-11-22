@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
 
       try {
-        await sendGmailEmail(email, `New Contact: ${name}`, htmlBody);
+        await sendGmailEmail("optisolvelabs@gmail.com", `New Contact Form Submission from ${name}`, htmlBody);
       } catch (emailError) {
         console.warn("Failed to send email, but form was received:", emailError);
         // Don't fail the request if email fails - the form was still received
