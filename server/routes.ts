@@ -14,6 +14,33 @@ if (!ADMIN_SECRET) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // POST /api/contact - Handle contact form submissions
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, message } = req.body;
+
+      // Basic validation
+      if (!name || !email || !message) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      if (!email.includes("@")) {
+        return res.status(400).json({ error: "Invalid email address" });
+      }
+
+      // Log the message (in production, this would be sent to email or database)
+      console.log(`Contact form submission: ${name} (${email}) - ${message}`);
+
+      res.json({
+        success: true,
+        message: "Message received! We'll get back to you on WhatsApp shortly.",
+      });
+    } catch (error) {
+      console.error("Error handling contact form:", error);
+      res.status(500).json({ error: "Failed to submit contact form" });
+    }
+  });
+
   // GET /api/promo/status - Get current promo status
   app.get("/api/promo/status", async (req, res) => {
     try {

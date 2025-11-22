@@ -28,16 +28,34 @@ export default function Home() {
     e.preventDefault();
     setSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    toast({
-      title: "Message sent!",
-      description: "We'll get back to you on WhatsApp shortly.",
-    });
+      const data = await response.json();
 
-    setFormData({ name: "", email: "", message: "" });
-    setSubmitting(false);
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      toast({
+        title: "Message sent!",
+        description: "We'll get back to you on WhatsApp shortly.",
+      });
+
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send message",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
