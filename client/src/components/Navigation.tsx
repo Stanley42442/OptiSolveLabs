@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X, MessageCircle, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getWhatsAppLink } from "@/lib/constants";
+import { useTheme } from "@/components/ThemeProvider";
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -44,8 +46,21 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* WhatsApp CTA Button (Desktop) */}
-          <div className="hidden md:flex items-center">
+          {/* Theme Toggle and WhatsApp CTA Button (Desktop) */}
+          <div className="hidden md:flex items-center gap-2">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={toggleTheme}
+              data-testid="button-theme-toggle"
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            >
+              {theme === "light" ? (
+                <Moon className="w-4 h-4" />
+              ) : (
+                <Sun className="w-4 h-4" />
+              )}
+            </Button>
             <a
               href={getWhatsAppLink()}
               target="_blank"
@@ -59,19 +74,34 @@ export function Navigation() {
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-md hover-elevate active-elevate-2"
-            aria-label="Toggle mobile menu"
-            data-testid="button-mobile-menu-toggle"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
+          {/* Theme Toggle and Mobile Menu Button */}
+          <div className="md:hidden flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-md hover-elevate active-elevate-2"
+              aria-label="Toggle theme"
+              data-testid="button-theme-toggle-mobile"
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            >
+              {theme === "light" ? (
+                <Moon className="w-5 h-5" />
+              ) : (
+                <Sun className="w-5 h-5" />
+              )}
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-md hover-elevate active-elevate-2"
+              aria-label="Toggle mobile menu"
+              data-testid="button-mobile-menu-toggle"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
