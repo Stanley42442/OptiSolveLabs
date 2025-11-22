@@ -18,6 +18,12 @@ if (!ADMIN_SECRET) {
 let connectionSettings: any;
 
 async function getGmailAccessToken() {
+  // For Netlify deployment - use environment variable
+  if (process.env.GMAIL_ACCESS_TOKEN) {
+    return process.env.GMAIL_ACCESS_TOKEN;
+  }
+
+  // For Replit development - use connector
   if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
     return connectionSettings.settings.access_token;
   }
@@ -30,7 +36,7 @@ async function getGmailAccessToken() {
     : null;
 
   if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+    throw new Error('Gmail not configured. Set GMAIL_ACCESS_TOKEN env var for Netlify deployment or use Replit connector.');
   }
 
   connectionSettings = await fetch(
