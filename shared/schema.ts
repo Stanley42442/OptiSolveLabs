@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -17,7 +17,20 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-// Promo status interface for in-memory storage
+// Promo status table for persistent storage across serverless instances
+export const promoStatuses = pgTable("promo_statuses", {
+  id: serial("id").primaryKey(),
+  month: integer("month").notNull(),
+  year: integer("year").notNull(),
+  slotsRemaining: integer("slots_remaining").notNull(),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+});
+
+export const insertPromoStatusSchema = createInsertSchema(promoStatuses).omit({ id: true, lastUpdated: true });
+export type InsertPromoStatus = z.infer<typeof insertPromoStatusSchema>;
+export type PromoStatusDB = typeof promoStatuses.$inferSelect;
+
+// Promo status interface (kept for compatibility)
 export interface PromoStatus {
   month: number;
   year: number;

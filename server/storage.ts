@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type PromoStatus } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { type User, type InsertUser, type PromoStatus, users, promoStatuses } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -12,70 +13,83 @@ export interface IStorage {
   updatePromoSlots(month: number, year: number, slots: number): Promise<PromoStatus>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private promoStatuses: Map<string, PromoStatus>;
-
-  constructor() {
-    this.users = new Map();
-    this.promoStatuses = new Map();
-    
-    // Initialize current month's promo with 3 slots
-    const now = new Date();
-    const key = `${now.getFullYear()}-${now.getMonth()}`;
-    this.promoStatuses.set(key, {
-      month: now.getMonth(),
-      year: now.getFullYear(),
-      slotsRemaining: 3,
-      lastUpdated: now
-    });
-  }
-
+export class DBStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
   }
 
   async getPromoStatus(month: number, year: number): Promise<PromoStatus | undefined> {
-    const key = `${year}-${month}`;
-    return this.promoStatuses.get(key);
+    const result = await db
+      .select()
+      .from(promoStatuses)
+      .where(and(eq(promoStatuses.month, month), eq(promoStatuses.year, year)))
+      .limit(1);
+    
+    if (!result[0]) return undefined;
+    
+    return {
+      month: result[0].month,
+      year: result[0].year,
+      slotsRemaining: result[0].slotsRemaining,
+      lastUpdated: result[0].lastUpdated,
+    };
   }
 
   async createPromoStatus(month: number, year: number, slots: number): Promise<PromoStatus> {
-    const key = `${year}-${month}`;
-    const status: PromoStatus = {
-      month,
-      year,
-      slotsRemaining: slots,
-      lastUpdated: new Date()
+    const result = await db
+      .insert(promoStatuses)
+      .values({
+        month,
+        year,
+        slotsRemaining: slots,
+      })
+      .returning();
+    
+    return {
+      month: result[0].month,
+      year: result[0].year,
+      slotsRemaining: result[0].slotsRemaining,
+      lastUpdated: result[0].lastUpdated,
     };
-    this.promoStatuses.set(key, status);
-    return status;
   }
 
   async updatePromoSlots(month: number, year: number, slots: number): Promise<PromoStatus> {
-    const key = `${year}-${month}`;
-    const status: PromoStatus = {
-      month,
-      year,
-      slotsRemaining: slots,
-      lastUpdated: new Date()
-    };
-    this.promoStatuses.set(key, status);
-    return status;
+    // First check if status exists
+    const existing = await this.getPromoStatus(month, year);
+    
+    if (existing) {
+      // Update existing
+      const result = await db
+        .update(promoStatuses)
+        .set({
+          slotsRemaining: slots,
+          lastUpdated: new Date(),
+        })
+        .where(and(eq(promoStatuses.month, month), eq(promoStatuses.year, year)))
+        .returning();
+      
+      return {
+        month: result[0].month,
+        year: result[0].year,
+        slotsRemaining: result[0].slotsRemaining,
+        lastUpdated: result[0].lastUpdated,
+      };
+    } else {
+      // Create new
+      return await this.createPromoStatus(month, year, slots);
+    }
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DBStorage();
