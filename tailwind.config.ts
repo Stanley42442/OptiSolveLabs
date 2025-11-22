@@ -81,6 +81,14 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        whatsapp: {
+          DEFAULT: "hsl(var(--whatsapp-green) / <alpha-value>)",
+          dark: "hsl(var(--whatsapp-dark) / <alpha-value>)",
+        },
+        promo: {
+          DEFAULT: "hsl(var(--promo-yellow) / <alpha-value>)",
+          foreground: "hsl(var(--promo-yellow-foreground) / <alpha-value>)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
