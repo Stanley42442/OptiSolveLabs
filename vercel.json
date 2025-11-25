@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "vite build",
+  "buildCommand": "bash build.sh",
   "env": {
     "NODE_ENV": "production"
   }
