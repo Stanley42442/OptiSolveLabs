@@ -34,7 +34,9 @@ export default function Admin() {
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactLocation, setContactLocation] = useState("");
-  const [contactHours, setContactHours] = useState("");
+  const [contactHoursMondayFriday, setContactHoursMondayFriday] = useState("");
+  const [contactHoursSaturday, setContactHoursSaturday] = useState("");
+  const [contactHoursSunday, setContactHoursSunday] = useState("");
   const [updatingContact, setUpdatingContact] = useState(false);
 
   // About Info State
@@ -109,7 +111,12 @@ export default function Admin() {
         setContactPhone(contactData.phone);
         setContactEmail(contactData.email);
         setContactLocation(contactData.location);
-        setContactHours(contactData.businessHours);
+        if (contactData.businessHours) {
+          const lines = contactData.businessHours.split('\n');
+          setContactHoursMondayFriday(lines[0] || "");
+          setContactHoursSaturday(lines[1] || "");
+          setContactHoursSunday(lines[2] || "");
+        }
       }
 
       if (aboutData.developerPictureUrl) {
@@ -131,6 +138,7 @@ export default function Admin() {
   const handleUpdateContact = async () => {
     setUpdatingContact(true);
     try {
+      const businessHours = [contactHoursMondayFriday, contactHoursSaturday, contactHoursSunday].join('\n');
       const response = await fetch("/api/admin/contact-info", {
         method: "POST",
         headers: {
@@ -142,7 +150,7 @@ export default function Admin() {
           phone: contactPhone,
           email: contactEmail,
           location: contactLocation,
-          businessHours: contactHours,
+          businessHours,
         }),
       });
 
@@ -483,14 +491,35 @@ export default function Admin() {
                     data-testid="input-contact-location"
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Business Hours</label>
-                  <Textarea
-                    placeholder="Business hours (e.g., Mon-Fri: 9AM-6PM, Sat: 10AM-4PM)"
-                    value={contactHours}
-                    onChange={(e) => setContactHours(e.target.value)}
-                    data-testid="textarea-contact-hours"
-                  />
+                <div className="space-y-3">
+                  <label className="text-sm font-medium block">Business Hours</label>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">Monday - Friday</label>
+                    <Input
+                      placeholder="e.g., 9:00 AM - 6:00 PM"
+                      value={contactHoursMondayFriday}
+                      onChange={(e) => setContactHoursMondayFriday(e.target.value)}
+                      data-testid="input-contact-hours-monday-friday"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">Saturday</label>
+                    <Input
+                      placeholder="e.g., 10:00 AM - 4:00 PM"
+                      value={contactHoursSaturday}
+                      onChange={(e) => setContactHoursSaturday(e.target.value)}
+                      data-testid="input-contact-hours-saturday"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">Sunday</label>
+                    <Input
+                      placeholder="e.g., Closed or 12:00 PM - 4:00 PM"
+                      value={contactHoursSunday}
+                      onChange={(e) => setContactHoursSunday(e.target.value)}
+                      data-testid="input-contact-hours-sunday"
+                    />
+                  </div>
                 </div>
                 <Button
                   onClick={handleUpdateContact}
