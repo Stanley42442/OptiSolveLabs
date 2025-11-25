@@ -2,11 +2,7 @@ import { Link } from "wouter";
 import { MessageCircle, Menu, FileText, Palette, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { getWhatsAppLink, SERVICES, TESTIMONIALS } from "@/lib/constants";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 const iconMap = {
   MessageCircle,
@@ -16,47 +12,6 @@ const iconMap = {
 };
 
 export default function Home() {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send message");
-      }
-
-      toast({
-        title: "Message sent!",
-        description: "We'll get back to you on WhatsApp shortly.",
-      });
-
-      setFormData({ name: "", email: "", message: "" });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send message",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
     <div className="min-h-screen">
@@ -176,81 +131,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Form Section */}
-      <section className="py-16 sm:py-24" id="contact">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-contact-title">Get in Touch</h2>
-            <p className="text-lg text-muted-foreground" data-testid="text-contact-subtitle">
-              Have questions? Fill out the form below or contact us directly on WhatsApp.
-            </p>
-          </div>
-
-          <Card>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-2">
-                      Name
-                    </label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                      data-testid="input-contact-name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-2">
-                      Email
-                    </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                      data-testid="input-contact-email"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium mb-2">
-                    Message
-                  </label>
-                  <Textarea
-                    id="message"
-                    rows={4}
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    required
-                    data-testid="input-contact-message"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={submitting}
-                  data-testid="button-contact-submit"
-                >
-                  {submitting ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <div className="text-center mt-8">
-            <p className="text-muted-foreground mb-4" data-testid="text-whatsapp-prompt">Or reach us instantly on WhatsApp</p>
-            <a
-              href={getWhatsAppLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="link-contact-whatsapp"
-            >
-              <Button className="bg-whatsapp hover:bg-whatsapp-dark" data-testid="button-contact-whatsapp">
-                <MessageCircle className="w-4 h-4 mr-2" />
+      {/* CTA Section */}
+      <section className="py-16 sm:py-24 bg-gradient-to-r from-primary/10 to-primary/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-cta-title">Ready to Get Started?</h2>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto" data-testid="text-cta-subtitle">
+            Let's fix your website today. Contact us for a quick consultation.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/contact">
+              <Button size="lg" data-testid="button-contact-cta">Get in Touch</Button>
+            </Link>
+            <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer">
+              <Button size="lg" variant="outline" data-testid="button-whatsapp-cta">
+                <MessageCircle className="w-5 h-5 mr-2" />
                 Chat on WhatsApp
               </Button>
             </a>

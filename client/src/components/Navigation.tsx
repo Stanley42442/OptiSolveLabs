@@ -13,6 +13,7 @@ export function Navigation() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
+    { href: "/contact", label: "Contact" },
     { href: "/whatsapp-button", label: "WhatsApp Fix" },
     { href: "/menu-fix", label: "Menu Fix" },
     { href: "/form-fix", label: "Form Fix" },

@@ -13,6 +13,7 @@ import WhatsAppButtonService from "@/pages/WhatsAppButtonService";
 import MenuFixService from "@/pages/MenuFixService";
 import FormFixService from "@/pages/FormFixService";
 import VisualOverhaulService from "@/pages/VisualOverhaulService";
+import Contact from "@/pages/Contact";
 import Admin from "@/pages/Admin";
 import NotFound from "@/pages/not-found";
 
@@ -21,6 +22,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/services" component={Services} />
+      <Route path="/contact" component={Contact} />
       <Route path="/whatsapp-button" component={WhatsAppButtonService} />
       <Route path="/menu-fix" component={MenuFixService} />
       <Route path="/form-fix" component={FormFixService} />
