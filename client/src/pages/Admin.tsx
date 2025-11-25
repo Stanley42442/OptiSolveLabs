@@ -152,6 +152,7 @@ export default function Admin() {
         title: "Updated!",
         description: "Contact information updated successfully",
       });
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/contact-info"] });
     } catch (error) {
       toast({
         title: "Error",
@@ -185,6 +186,7 @@ export default function Admin() {
         title: "Updated!",
         description: "About information updated successfully",
       });
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/about-info"] });
     } catch (error) {
       toast({
         title: "Error",
@@ -216,6 +218,7 @@ export default function Admin() {
         title: "Updated!",
         description: "Home page information updated successfully",
       });
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/home-info"] });
     } catch (error) {
       toast({
         title: "Error",
@@ -248,6 +251,7 @@ export default function Admin() {
         title: "Updated!",
         description: "Service images updated successfully",
       });
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/service-images"] });
     } catch (error) {
       toast({
         title: "Error",
@@ -590,8 +594,18 @@ export default function Admin() {
                   <label className="text-sm font-medium mb-2 block">Select Service</label>
                   <select
                     value={selectedService}
-                    onChange={(e) => setSelectedService(e.target.value)}
-                    className="w-full border rounded-md p-2"
+                    onChange={async (e) => {
+                      setSelectedService(e.target.value);
+                      try {
+                        const res = await fetch(`/api/admin/service-images/${e.target.value}`);
+                        const data = await res.json();
+                        setBeforeImage(data.beforeImageUrl || "");
+                        setAfterImage(data.afterImageUrl || "");
+                      } catch (error) {
+                        console.error("Error loading service images:", error);
+                      }
+                    }}
+                    className="w-full border rounded-md p-2 cursor-text"
                     data-testid="select-service"
                   >
                     <option value="whatsapp-button">WhatsApp Button Fix</option>
@@ -641,20 +655,45 @@ export default function Admin() {
                   <label className="text-sm font-medium mb-2 block">Select Service</label>
                   <select
                     value={selectedServiceForPricing}
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       setSelectedServiceForPricing(e.target.value);
-                      const service = SERVICES.find(s => s.id === e.target.value);
-                      if (service) {
-                        setPricingTiers(service.pricing.map((tier, idx) => ({
-                          id: idx,
-                          name: tier.name,
-                          originalPrice: tier.originalPrice,
-                          deliveryTime: tier.deliveryTime,
-                          features: tier.features.join("\n"),
-                        })));
+                      try {
+                        const res = await fetch(`/api/admin/service-pricing/${e.target.value}`);
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                          setPricingTiers(data.map((tier, idx) => ({
+                            id: idx,
+                            name: tier.tierName,
+                            originalPrice: tier.originalPrice,
+                            deliveryTime: tier.deliveryTime,
+                            features: typeof tier.features === 'string' ? tier.features : tier.features.join("\n"),
+                          })));
+                        } else {
+                          const service = SERVICES.find(s => s.id === e.target.value);
+                          if (service) {
+                            setPricingTiers(service.pricing.map((tier, idx) => ({
+                              id: idx,
+                              name: tier.name,
+                              originalPrice: tier.originalPrice,
+                              deliveryTime: tier.deliveryTime,
+                              features: tier.features.join("\n"),
+                            })));
+                          }
+                        }
+                      } catch (error) {
+                        const service = SERVICES.find(s => s.id === e.target.value);
+                        if (service) {
+                          setPricingTiers(service.pricing.map((tier, idx) => ({
+                            id: idx,
+                            name: tier.name,
+                            originalPrice: tier.originalPrice,
+                            deliveryTime: tier.deliveryTime,
+                            features: tier.features.join("\n"),
+                          })));
+                        }
                       }
                     }}
-                    className="w-full border rounded-md p-2"
+                    className="w-full border rounded-md p-2 cursor-text"
                     data-testid="select-service-pricing"
                   >
                     {SERVICES.map(service => (

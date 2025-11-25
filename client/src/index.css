@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+input, textarea, select {
+  @apply cursor-text;
+}
+
+input:focus, textarea:focus, select:focus {
+  @apply cursor-text;
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);
