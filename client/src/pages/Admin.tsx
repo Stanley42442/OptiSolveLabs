@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { PromoStatusResponse } from "@shared/schema";
+import { SERVICES } from "@/lib/constants";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -46,6 +47,11 @@ export default function Admin() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(false);
   const [deletingTestimonial, setDeletingTestimonial] = useState(false);
+
+  // Pricing State
+  const [selectedServiceForPricing, setSelectedServiceForPricing] = useState("whatsapp-button");
+  const [pricingTiers, setPricingTiers] = useState<any[]>([]);
+  const [updatingPricing, setUpdatingPricing] = useState(false);
 
   const { data: promoStatus, isLoading } = useQuery<PromoStatusResponse>({
     queryKey: ["/api/promo/status"],
@@ -334,12 +340,13 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="promo" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-7">
             <TabsTrigger value="promo">Promo</TabsTrigger>
             <TabsTrigger value="contact">Contact</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
             <TabsTrigger value="home">Home</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
+            <TabsTrigger value="services">Images</TabsTrigger>
+            <TabsTrigger value="pricing">Pricing</TabsTrigger>
             <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
           </TabsList>
 
@@ -575,7 +582,6 @@ export default function Admin() {
                   >
                     <option value="whatsapp-button">WhatsApp Button Fix</option>
                     <option value="menu-fix">Menu Fix</option>
-                    <option value="form-fix">Form Fix</option>
                     <option value="visual-overhaul">Visual Overhaul</option>
                   </select>
                 </div>
@@ -605,6 +611,128 @@ export default function Admin() {
                 >
                   {updatingImages ? "Saving..." : "Save Service Images"}
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Pricing Tab */}
+          <TabsContent value="pricing" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Service Pricing</CardTitle>
+                <CardDescription>Edit pricing tiers for each service</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Select Service</label>
+                  <select
+                    value={selectedServiceForPricing}
+                    onChange={(e) => {
+                      setSelectedServiceForPricing(e.target.value);
+                      const service = SERVICES.find(s => s.id === e.target.value);
+                      if (service) {
+                        setPricingTiers(service.pricing.map((tier, idx) => ({
+                          id: idx,
+                          name: tier.name,
+                          originalPrice: tier.originalPrice,
+                          deliveryTime: tier.deliveryTime,
+                          features: tier.features.join("\n"),
+                        })));
+                      }
+                    }}
+                    className="w-full border rounded-md p-2"
+                    data-testid="select-service-pricing"
+                  >
+                    {SERVICES.map(service => (
+                      <option key={service.id} value={service.id}>{service.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {pricingTiers.length > 0 ? (
+                  <div className="space-y-6 mt-6">
+                    {pricingTiers.map((tier, idx) => (
+                      <div key={idx} className="p-4 border rounded-lg space-y-3">
+                        <h4 className="font-semibold text-lg">{tier.name} Tier</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-sm font-medium mb-1 block">Original Price (₦)</label>
+                            <Input
+                              type="number"
+                              value={tier.originalPrice}
+                              onChange={(e) => {
+                                const updated = [...pricingTiers];
+                                updated[idx].originalPrice = parseInt(e.target.value) || 0;
+                                setPricingTiers(updated);
+                              }}
+                              data-testid={`input-price-${idx}`}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium mb-1 block">Delivery Time</label>
+                            <Input
+                              value={tier.deliveryTime}
+                              onChange={(e) => {
+                                const updated = [...pricingTiers];
+                                updated[idx].deliveryTime = e.target.value;
+                                setPricingTiers(updated);
+                              }}
+                              data-testid={`input-delivery-${idx}`}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-1 block">Features (one per line)</label>
+                          <Textarea
+                            value={tier.features}
+                            onChange={(e) => {
+                              const updated = [...pricingTiers];
+                              updated[idx].features = e.target.value;
+                              setPricingTiers(updated);
+                            }}
+                            className="min-h-24 text-sm"
+                            data-testid={`textarea-features-${idx}`}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      onClick={async () => {
+                        setUpdatingPricing(true);
+                        try {
+                          const response = await fetch(`/api/admin/service-pricing/${selectedServiceForPricing}`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "X-Admin-Secret": adminSecret,
+                            },
+                            body: JSON.stringify(
+                              pricingTiers.map(tier => ({
+                                tierName: tier.name,
+                                originalPrice: tier.originalPrice,
+                                deliveryTime: tier.deliveryTime,
+                                features: tier.features,
+                              }))
+                            ),
+                          });
+                          if (!response.ok) throw new Error();
+                          toast({ title: "Updated!", description: "Pricing updated successfully" });
+                        } catch {
+                          toast({ title: "Error", description: "Failed to update pricing", variant: "destructive" });
+                        } finally {
+                          setUpdatingPricing(false);
+                        }
+                      }}
+                      disabled={updatingPricing}
+                      className="w-full"
+                      data-testid="button-update-pricing"
+                    >
+                      {updatingPricing ? "Saving..." : "Save Pricing"}
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-center py-8 text-muted-foreground">Select a service to view pricing</p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
