@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Shield, RefreshCw, LogOut, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,16 @@ export default function Admin() {
   const [password, setPassword] = useState("");
   const [adminSecret, setAdminSecret] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Restore authentication from localStorage on mount
+  useEffect(() => {
+    const savedSecret = localStorage.getItem("adminSecret");
+    if (savedSecret) {
+      setAdminSecret(savedSecret);
+      setIsAuthenticated(true);
+      loadAllData();
+    }
+  }, []);
   const [newSlots, setNewSlots] = useState("");
   const [updating, setUpdating] = useState(false);
 
@@ -62,6 +72,7 @@ export default function Admin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password) {
+      localStorage.setItem("adminSecret", password);
       setAdminSecret(password);
       setIsAuthenticated(true);
       toast({
@@ -331,6 +342,7 @@ export default function Admin() {
               setIsAuthenticated(false);
               setPassword("");
               setAdminSecret("");
+              localStorage.removeItem("adminSecret");
             }}
             data-testid="button-admin-logout"
           >
