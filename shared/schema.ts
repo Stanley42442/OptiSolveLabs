@@ -77,3 +77,69 @@ export const updatePromoSlotsSchema = z.object({
 });
 
 export type UpdatePromoSlotsRequest = z.infer<typeof updatePromoSlotsSchema>;
+
+// Contact Info table
+export const contactInfo = pgTable("contact_info", {
+  id: serial("id").primaryKey(),
+  whatsapp: varchar("whatsapp", { length: 20 }).notNull().default(""),
+  phone: varchar("phone", { length: 20 }).notNull().default(""),
+  email: varchar("email", { length: 255 }).notNull().default(""),
+  location: text("location").notNull().default(""),
+  businessHours: text("business_hours").notNull().default(""),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertContactInfoSchema = createInsertSchema(contactInfo).omit({ id: true, updatedAt: true });
+export type InsertContactInfo = z.infer<typeof insertContactInfoSchema>;
+export type ContactInfo = typeof contactInfo.$inferSelect;
+
+// About Info table
+export const aboutInfo = pgTable("about_info", {
+  id: serial("id").primaryKey(),
+  developerPictureUrl: text("developer_picture_url").notNull().default(""),
+  aboutDescription: text("about_description").notNull().default(""),
+  missionDescription: text("mission_description").notNull().default(""),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertAboutInfoSchema = createInsertSchema(aboutInfo).omit({ id: true, updatedAt: true });
+export type InsertAboutInfo = z.infer<typeof insertAboutInfoSchema>;
+export type AboutInfo = typeof aboutInfo.$inferSelect;
+
+// Home Info table
+export const homeInfo = pgTable("home_info", {
+  id: serial("id").primaryKey(),
+  demoVideoUrl: text("demo_video_url").notNull().default(""),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertHomeInfoSchema = createInsertSchema(homeInfo).omit({ id: true, updatedAt: true });
+export type InsertHomeInfo = z.infer<typeof insertHomeInfoSchema>;
+export type HomeInfo = typeof homeInfo.$inferSelect;
+
+// Service Images table
+export const serviceImages = pgTable("service_images", {
+  id: serial("id").primaryKey(),
+  serviceId: varchar("service_id", { length: 50 }).notNull(),
+  beforeImageUrl: text("before_image_url").notNull().default(""),
+  afterImageUrl: text("after_image_url").notNull().default(""),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertServiceImagesSchema = createInsertSchema(serviceImages).omit({ id: true, updatedAt: true });
+export type InsertServiceImages = z.infer<typeof insertServiceImagesSchema>;
+export type ServiceImages = typeof serviceImages.$inferSelect;
+
+// Website Testimonials table
+export const websiteTestimonials = pgTable("website_testimonials", {
+  id: varchar("id", { length: 50 }).primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  location: varchar("location", { length: 255 }).notNull(),
+  rating: integer("rating").notNull(),
+  quote: text("quote").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertWebsiteTestimonialsSchema = createInsertSchema(websiteTestimonials).omit({ createdAt: true });
+export type InsertWebsiteTestimonials = z.infer<typeof insertWebsiteTestimonialsSchema>;
+export type WebsiteTestimonials = typeof websiteTestimonials.$inferSelect;
