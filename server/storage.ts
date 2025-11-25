@@ -174,15 +174,17 @@ class MemStorage implements IStorage {
   }
 
   async getServicePricing(serviceId: string): Promise<ServicePricing[]> {
-    return Array.from(this.serviceImagesData.values())
-      .filter(img => (img as any).serviceId === serviceId)
-      .map(img => ({ ...img, features: "" } as ServicePricing));
+    return [];
   }
 
   async updateServicePricing(serviceId: string, pricing: InsertServicePricing[]): Promise<ServicePricing[]> {
     return pricing.map((p, idx) => ({
       id: idx,
-      ...p,
+      serviceId,
+      tierName: p.tierName,
+      originalPrice: p.originalPrice,
+      deliveryTime: p.deliveryTime,
+      features: p.features,
       updatedAt: new Date(),
     })) as ServicePricing[];
   }
