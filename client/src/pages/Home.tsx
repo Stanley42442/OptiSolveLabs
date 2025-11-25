@@ -20,10 +20,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4" data-testid="text-hero-title">
-              Fix Your Website Issues Fast
+              Professional Mobile Frontend Solutions
             </h1>
             <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto mb-8" data-testid="text-hero-subtitle">
-              Professional website optimization services. Get your WhatsApp buttons, menus, forms, and design working perfectly.
+              Expert website optimization services. Resolve WhatsApp integration issues, navigation problems, form functionality, and design enhancements with precision and expertise.
             </p>
             <a
               href={getWhatsAppLink()}
@@ -33,7 +33,7 @@ export default function Home() {
             >
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8">
                 <MessageCircle className="w-5 h-5 mr-2" />
-                Get Started Now
+                Request a Consultation
               </Button>
             </a>
           </div>
@@ -58,9 +58,9 @@ export default function Home() {
       <section className="py-16 sm:py-24" id="services">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-services-title">What We Fix</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-services-title">Our Services</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto" data-testid="text-services-subtitle">
-              Expert solutions for the most common website problems. Fast turnaround, professional results.
+              Specialized solutions for critical website functionality. Rapid resolution with superior quality assurance.
             </p>
           </div>
 
@@ -98,9 +98,9 @@ export default function Home() {
       <section className="py-16 sm:py-24 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-testimonials-title">What Our Clients Say</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-testimonials-title">Client Testimonials</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto" data-testid="text-testimonials-subtitle">
-              Join hundreds of satisfied customers who've fixed their websites with OptiSolve Labs.
+              Trusted by leading businesses worldwide for professional frontend optimization services.
             </p>
           </div>
 

@@ -77,16 +77,16 @@ export default function About() {
 
             {/* About Text */}
             <div data-testid="section-about-story">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6">Why OptiSolve Labs?</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-6">About OptiSolve Labs</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  I started OptiSolve Labs because I noticed businesses worldwide losing customers due to simple mobile website bugs. A broken hamburger menu, a non-working WhatsApp button, or a contact form that doesn't send emails can cost you real money in lost sales every day.
+                  OptiSolve Labs was founded to address a critical challenge facing businesses globally: functional website issues that directly impact revenue. A malfunctioning navigation menu, non-responsive WhatsApp integration, or failed form submissions represent significant lost conversion opportunities and customer frustration.
                 </p>
                 <p>
-                  As a frontend developer specializing in mobile-first development based in Nigeria, I've seen these problems countless times across clients globally. That's why I decided to offer fast, affordable, and professional bug fixing services to businesses and startups worldwide.
+                  As a specialized frontend developer focused on mobile-first optimization based in Nigeria, I have diagnosed and resolved these issues across diverse client portfolios worldwide. This expertise led to establishing OptiSolve Labs—a dedicated service providing rapid, cost-effective, and professional solutions to businesses and enterprises globally.
                 </p>
                 <p>
-                  I don't build entire websites - I focus exclusively on fixing mobile bugs quickly and efficiently. This specialization means I can solve your problem faster and more affordably than general web developers, no matter where you are.
+                  Rather than offering comprehensive web development, OptiSolve Labs specializes exclusively in mobile frontend remediation. This focused approach enables faster resolution and superior cost efficiency compared to generalist developers, regardless of your location or industry.
                 </p>
               </div>
             </div>
@@ -137,10 +137,10 @@ export default function About() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-8" data-testid="text-mission-title">My Mission</h2>
           <div className="space-y-6 text-muted-foreground text-lg" data-testid="section-mission-statement">
             <p>
-              To help Nigerian businesses succeed online by ensuring their websites work perfectly on mobile devices. Every broken button or menu is a potential customer lost. I'm here to make sure you never lose another customer to a simple mobile bug.
+              Our mission is to enable businesses worldwide to maximize digital effectiveness by ensuring optimal mobile functionality. Every technical failure represents a missed customer interaction and revenue opportunity. We eliminate preventable obstacles that impede online success.
             </p>
             <p>
-              Whether you're an e-commerce business, a SaaS startup, or a local service provider anywhere in the world, I'm committed to providing fast, reliable, and affordable mobile bug fixing services.
+              Whether operating as an e-commerce enterprise, technology startup, or service-based organization across any industry vertical, our commitment remains steadfast: delivering rapid, dependable, and cost-effective mobile frontend optimization services at enterprise quality standards.
             </p>
           </div>
         </div>

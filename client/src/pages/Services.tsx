@@ -16,9 +16,9 @@ export default function Services() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4" data-testid="text-page-title">Our Services</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4" data-testid="text-page-title">Specialized Services</h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto" data-testid="text-page-subtitle">
-            Professional website optimization and repair services. We fix common website issues quickly and efficiently, so you can focus on growing your business.
+            Expert mobile frontend optimization and repair services. We resolve critical website issues with precision and efficiency, enabling you to maintain business continuity.
           </p>
         </div>
 
@@ -56,21 +56,21 @@ export default function Services() {
           <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center" data-testid="text-why-choose-title">Why Choose OptiSolve Labs?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center" data-testid="feature-fast">
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="text-feature-fast-title">Fast</div>
+              <div className="text-4xl font-bold text-primary mb-2" data-testid="text-feature-fast-title">Efficient</div>
               <p className="text-muted-foreground" data-testid="text-feature-fast-description">
-                Most fixes completed within 24-72 hours. Rush options available for urgent needs.
+                Most issues resolved within 24-72 hours. Expedited service available for time-sensitive requirements.
               </p>
             </div>
             <div className="text-center" data-testid="feature-reliable">
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="text-feature-reliable-title">Reliable</div>
+              <div className="text-4xl font-bold text-primary mb-2" data-testid="text-feature-reliable-title">Professional</div>
               <p className="text-muted-foreground" data-testid="text-feature-reliable-description">
-                Professional service with 30-90 day support included. Your satisfaction is guaranteed.
+                Comprehensive support with 30-90 day follow-up included. Complete satisfaction commitment.
               </p>
             </div>
             <div className="text-center" data-testid="feature-affordable">
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="text-feature-affordable-title">Affordable</div>
+              <div className="text-4xl font-bold text-primary mb-2" data-testid="text-feature-affordable-title">Transparent</div>
               <p className="text-muted-foreground" data-testid="text-feature-affordable-description">
-                Competitive pricing with transparent costs. No hidden fees. First 3 customers get 50% off!
+                Competitive pricing with full cost visibility. No additional charges. Early adopters receive 50% discount.
               </p>
             </div>
           </div>
