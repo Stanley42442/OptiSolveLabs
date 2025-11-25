@@ -14,6 +14,7 @@ import MenuFixService from "@/pages/MenuFixService";
 import FormFixService from "@/pages/FormFixService";
 import VisualOverhaulService from "@/pages/VisualOverhaulService";
 import Contact from "@/pages/Contact";
+import About from "@/pages/About";
 import Admin from "@/pages/Admin";
 import NotFound from "@/pages/not-found";
 
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/services" component={Services} />
       <Route path="/contact" component={Contact} />
+      <Route path="/about" component={About} />
       <Route path="/whatsapp-button" component={WhatsAppButtonService} />
       <Route path="/menu-fix" component={MenuFixService} />
       <Route path="/form-fix" component={FormFixService} />
