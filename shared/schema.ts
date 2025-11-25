@@ -53,6 +53,21 @@ export interface PricingTier {
   features: string[];
 }
 
+// Service pricing table
+export const servicePricing = pgTable("service_pricing", {
+  id: serial("id").primaryKey(),
+  serviceId: varchar("service_id", { length: 50 }).notNull(),
+  tierName: varchar("tier_name", { length: 100 }).notNull(),
+  originalPrice: integer("original_price").notNull(),
+  deliveryTime: varchar("delivery_time", { length: 100 }).notNull(),
+  features: text("features").notNull(), // JSON string
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertServicePricingSchema = createInsertSchema(servicePricing).omit({ id: true, updatedAt: true });
+export type InsertServicePricing = z.infer<typeof insertServicePricingSchema>;
+export type ServicePricing = typeof servicePricing.$inferSelect;
+
 // Service metadata
 export interface Service {
   id: string;

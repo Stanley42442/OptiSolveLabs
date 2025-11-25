@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type PromoStatus, users, promoStatuses, contactInfo, aboutInfo, homeInfo, serviceImages, websiteTestimonials, type ContactInfo, type AboutInfo, type HomeInfo, type ServiceImages, type WebsiteTestimonials, type InsertContactInfo, type InsertAboutInfo, type InsertHomeInfo, type InsertServiceImages, type InsertWebsiteTestimonials } from "@shared/schema";
+import { type User, type InsertUser, type PromoStatus, users, promoStatuses, contactInfo, aboutInfo, homeInfo, serviceImages, websiteTestimonials, servicePricing, type ContactInfo, type AboutInfo, type HomeInfo, type ServiceImages, type WebsiteTestimonials, type InsertContactInfo, type InsertAboutInfo, type InsertHomeInfo, type InsertServiceImages, type InsertWebsiteTestimonials, type ServicePricing, type InsertServicePricing } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -31,6 +31,11 @@ export interface IStorage {
   // Testimonials methods
   getTestimonials(): Promise<WebsiteTestimonials[]>;
   deleteTestimonial(id: string): Promise<void>;
+  createTestimonial(testimonial: InsertWebsiteTestimonials): Promise<WebsiteTestimonials>;
+
+  // Service pricing methods
+  getServicePricing(serviceId: string): Promise<ServicePricing[]>;
+  updateServicePricing(serviceId: string, pricing: InsertServicePricing[]): Promise<ServicePricing[]>;
 }
 
 class MemStorage implements IStorage {
@@ -92,11 +97,16 @@ class MemStorage implements IStorage {
   }
 
   async updateContactInfo(info: InsertContactInfo): Promise<ContactInfo> {
-    this.contactData = {
+    const updated: ContactInfo = {
       id: this.contactData?.id || 1,
-      ...info,
+      whatsapp: info.whatsapp || "",
+      phone: info.phone || "",
+      email: info.email || "",
+      location: info.location || "",
+      businessHours: info.businessHours || "",
       updatedAt: new Date(),
     };
+    this.contactData = updated;
     return this.contactData;
   }
 
@@ -105,11 +115,14 @@ class MemStorage implements IStorage {
   }
 
   async updateAboutInfo(info: InsertAboutInfo): Promise<AboutInfo> {
-    this.aboutData = {
+    const updated: AboutInfo = {
       id: this.aboutData?.id || 1,
-      ...info,
+      developerPictureUrl: info.developerPictureUrl || "",
+      aboutDescription: info.aboutDescription || "",
+      missionDescription: info.missionDescription || "",
       updatedAt: new Date(),
     };
+    this.aboutData = updated;
     return this.aboutData;
   }
 
@@ -118,11 +131,12 @@ class MemStorage implements IStorage {
   }
 
   async updateHomeInfo(info: InsertHomeInfo): Promise<HomeInfo> {
-    this.homeData = {
+    const updated: HomeInfo = {
       id: this.homeData?.id || 1,
-      ...info,
+      demoVideoUrl: info.demoVideoUrl || "",
       updatedAt: new Date(),
     };
+    this.homeData = updated;
     return this.homeData;
   }
 
@@ -132,9 +146,10 @@ class MemStorage implements IStorage {
 
   async updateServiceImages(serviceId: string, images: InsertServiceImages): Promise<ServiceImages> {
     const data: ServiceImages = {
-      id: this.serviceImagesData.get(serviceId)?.id || Math.random(),
+      id: this.serviceImagesData.get(serviceId)?.id || Math.floor(Math.random() * 1000000),
       serviceId,
-      ...images,
+      beforeImageUrl: images.beforeImageUrl || "",
+      afterImageUrl: images.afterImageUrl || "",
       updatedAt: new Date(),
     };
     this.serviceImagesData.set(serviceId, data);
@@ -147,6 +162,29 @@ class MemStorage implements IStorage {
 
   async deleteTestimonial(id: string): Promise<void> {
     this.testimonialsData.delete(id);
+  }
+
+  async createTestimonial(testimonial: InsertWebsiteTestimonials): Promise<WebsiteTestimonials> {
+    const data: WebsiteTestimonials = {
+      ...testimonial,
+      createdAt: new Date(),
+    };
+    this.testimonialsData.set(testimonial.id, data);
+    return data;
+  }
+
+  async getServicePricing(serviceId: string): Promise<ServicePricing[]> {
+    return Array.from(this.serviceImagesData.values())
+      .filter(img => (img as any).serviceId === serviceId)
+      .map(img => ({ ...img, features: "" } as ServicePricing));
+  }
+
+  async updateServicePricing(serviceId: string, pricing: InsertServicePricing[]): Promise<ServicePricing[]> {
+    return pricing.map((p, idx) => ({
+      id: idx,
+      ...p,
+      updatedAt: new Date(),
+    })) as ServicePricing[];
   }
 }
 
@@ -295,6 +333,23 @@ export class DBStorage implements IStorage {
 
   async deleteTestimonial(id: string): Promise<void> {
     await db.delete(websiteTestimonials).where(eq(websiteTestimonials.id, id));
+  }
+
+  async createTestimonial(testimonial: InsertWebsiteTestimonials): Promise<WebsiteTestimonials> {
+    const result = await db.insert(websiteTestimonials).values(testimonial).returning();
+    return result[0];
+  }
+
+  async getServicePricing(serviceId: string): Promise<ServicePricing[]> {
+    return await db.select().from(servicePricing).where(eq(servicePricing.serviceId, serviceId));
+  }
+
+  async updateServicePricing(serviceId: string, pricing: InsertServicePricing[]): Promise<ServicePricing[]> {
+    await db.delete(servicePricing).where(eq(servicePricing.serviceId, serviceId));
+    const results = await db.insert(servicePricing).values(
+      pricing.map(p => ({ ...p, serviceId }))
+    ).returning();
+    return results;
   }
 }
 

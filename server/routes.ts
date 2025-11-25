@@ -1,11 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { updatePromoSlotsSchema, type PromoStatusResponse } from "@shared/schema";
+import { updatePromoSlotsSchema, type PromoStatusResponse, insertContactInfoSchema, insertAboutInfoSchema, insertHomeInfoSchema, insertServiceImagesSchema, insertWebsiteTestimonialsSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import { Resend } from "resend";
 
-// Require ADMIN_SECRET environment variable - fail fast if not set
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 if (!ADMIN_SECRET) {
   throw new Error(
@@ -14,7 +13,6 @@ if (!ADMIN_SECRET) {
   );
 }
 
-// Resend email service
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 async function sendResendEmail(to: string, subject: string, htmlBody: string) {
@@ -49,7 +47,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { name, email, message } = req.body;
 
-      // Basic validation
       if (!name || !email || !message) {
         return res.status(400).json({ error: "All fields are required" });
       }
@@ -58,7 +55,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid email address" });
       }
 
-      // Send email notification to admin
       const htmlBody = `
         <h2>New Contact Form Submission</h2>
         <p><strong>Name:</strong> ${name}</p>
@@ -73,7 +69,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await sendResendEmail("optisolvelabs@gmail.com", `New Contact Form Submission from ${name}`, htmlBody);
       } catch (emailError) {
         console.warn("Failed to send email, but form was received:", emailError);
-        // Don't fail the request if email fails - the form was still received
       }
 
       res.json({
@@ -95,7 +90,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let status = await storage.getPromoStatus(currentMonth, currentYear);
 
-      // If no status exists for current month, create one with 3 slots
       if (!status) {
         status = await storage.createPromoStatus(currentMonth, currentYear, 3);
       }
@@ -117,7 +111,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/promo/update-slots - Update promo slots (admin only)
   app.post("/api/promo/update-slots", async (req, res) => {
     try {
-      // Verify admin secret from header
       const adminSecret = req.headers["x-admin-secret"];
       
       if (!adminSecret || typeof adminSecret !== "string") {
@@ -128,7 +121,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Unauthorized: Invalid admin secret" });
       }
 
-      // Validate request body with Zod schema
       const validation = updatePromoSlotsSchema.safeParse(req.body);
       
       if (!validation.success) {
@@ -142,7 +134,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
 
-      // Update the slots
       const status = await storage.updatePromoSlots(currentMonth, currentYear, slots);
 
       const response: PromoStatusResponse = {
@@ -156,6 +147,168 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating promo slots:", error);
       res.status(500).json({ error: "Failed to update promo slots" });
+    }
+  });
+
+  // Content Management Routes (Admin Only)
+
+  // GET /api/admin/contact-info
+  app.get("/api/admin/contact-info", async (req, res) => {
+    try {
+      const info = await storage.getContactInfo();
+      res.json(info || {});
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch contact info" });
+    }
+  });
+
+  // POST /api/admin/contact-info
+  app.post("/api/admin/contact-info", async (req, res) => {
+    try {
+      const adminSecret = req.headers["x-admin-secret"];
+      if (!adminSecret || adminSecret !== ADMIN_SECRET) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const validation = insertContactInfoSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid data" });
+      }
+
+      const info = await storage.updateContactInfo(validation.data);
+      res.json(info);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update contact info" });
+    }
+  });
+
+  // GET /api/admin/about-info
+  app.get("/api/admin/about-info", async (req, res) => {
+    try {
+      const info = await storage.getAboutInfo();
+      res.json(info || {});
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch about info" });
+    }
+  });
+
+  // POST /api/admin/about-info
+  app.post("/api/admin/about-info", async (req, res) => {
+    try {
+      const adminSecret = req.headers["x-admin-secret"];
+      if (!adminSecret || adminSecret !== ADMIN_SECRET) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const validation = insertAboutInfoSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid data" });
+      }
+
+      const info = await storage.updateAboutInfo(validation.data);
+      res.json(info);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update about info" });
+    }
+  });
+
+  // GET /api/admin/home-info
+  app.get("/api/admin/home-info", async (req, res) => {
+    try {
+      const info = await storage.getHomeInfo();
+      res.json(info || {});
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch home info" });
+    }
+  });
+
+  // POST /api/admin/home-info
+  app.post("/api/admin/home-info", async (req, res) => {
+    try {
+      const adminSecret = req.headers["x-admin-secret"];
+      if (!adminSecret || adminSecret !== ADMIN_SECRET) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const validation = insertHomeInfoSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid data" });
+      }
+
+      const info = await storage.updateHomeInfo(validation.data);
+      res.json(info);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update home info" });
+    }
+  });
+
+  // GET /api/admin/service-images/:serviceId
+  app.get("/api/admin/service-images/:serviceId", async (req, res) => {
+    try {
+      const images = await storage.getServiceImages(req.params.serviceId);
+      res.json(images || {});
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch service images" });
+    }
+  });
+
+  // POST /api/admin/service-images/:serviceId
+  app.post("/api/admin/service-images/:serviceId", async (req, res) => {
+    try {
+      const adminSecret = req.headers["x-admin-secret"];
+      if (!adminSecret || adminSecret !== ADMIN_SECRET) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const validation = insertServiceImagesSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid data" });
+      }
+
+      const images = await storage.updateServiceImages(req.params.serviceId, validation.data);
+      res.json(images);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update service images" });
+    }
+  });
+
+  // GET /api/testimonials
+  app.get("/api/testimonials", async (req, res) => {
+    try {
+      const testimonials = await storage.getTestimonials();
+      res.json(testimonials);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch testimonials" });
+    }
+  });
+
+  // POST /api/testimonials
+  app.post("/api/testimonials", async (req, res) => {
+    try {
+      const validation = insertWebsiteTestimonialsSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: "Invalid data" });
+      }
+
+      const testimonial = await storage.createTestimonial(validation.data);
+      res.json(testimonial);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create testimonial" });
+    }
+  });
+
+  // DELETE /api/admin/testimonials/:id
+  app.delete("/api/admin/testimonials/:id", async (req, res) => {
+    try {
+      const adminSecret = req.headers["x-admin-secret"];
+      if (!adminSecret || adminSecret !== ADMIN_SECRET) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      await storage.deleteTestimonial(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete testimonial" });
     }
   });
 
