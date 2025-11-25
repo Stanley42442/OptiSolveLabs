@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { updatePromoSlotsSchema, type PromoStatusResponse, insertContactInfoSchema, insertAboutInfoSchema, insertHomeInfoSchema, insertServiceImagesSchema, insertWebsiteTestimonialsSchema } from "@shared/schema";
+import { updatePromoSlotsSchema, type PromoStatusResponse, insertContactInfoSchema, insertAboutInfoSchema, insertHomeInfoSchema, insertServiceImagesSchema, insertWebsiteTestimonialsSchema, insertServicePricingSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import { Resend } from "resend";
 
@@ -309,6 +309,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete testimonial" });
+    }
+  });
+
+  // GET /api/admin/service-pricing/:serviceId
+  app.get("/api/admin/service-pricing/:serviceId", async (req, res) => {
+    try {
+      const pricing = await storage.getServicePricing(req.params.serviceId);
+      res.json(pricing || []);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch service pricing" });
+    }
+  });
+
+  // POST /api/admin/service-pricing/:serviceId
+  app.post("/api/admin/service-pricing/:serviceId", async (req, res) => {
+    try {
+      const adminSecret = req.headers["x-admin-secret"];
+      if (!adminSecret || adminSecret !== ADMIN_SECRET) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      if (!Array.isArray(req.body)) {
+        return res.status(400).json({ error: "Expected an array of pricing tiers" });
+      }
+
+      const validated = req.body.map(tier => insertServicePricingSchema.parse(tier));
+      const pricing = await storage.updateServicePricing(req.params.serviceId, validated);
+      res.json(pricing);
+    } catch (error) {
+      console.error("Error updating service pricing:", error);
+      res.status(500).json({ error: "Failed to update service pricing" });
     }
   });
 

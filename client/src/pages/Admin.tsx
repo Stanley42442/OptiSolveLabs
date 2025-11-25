@@ -340,15 +340,17 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="promo" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-7">
-            <TabsTrigger value="promo">Promo</TabsTrigger>
-            <TabsTrigger value="contact">Contact</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="home">Home</TabsTrigger>
-            <TabsTrigger value="services">Images</TabsTrigger>
-            <TabsTrigger value="pricing">Pricing</TabsTrigger>
-            <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="inline-flex gap-1 min-w-max">
+              <TabsTrigger value="promo">Promo</TabsTrigger>
+              <TabsTrigger value="contact">Contact</TabsTrigger>
+              <TabsTrigger value="about">About</TabsTrigger>
+              <TabsTrigger value="home">Home</TabsTrigger>
+              <TabsTrigger value="services">Images</TabsTrigger>
+              <TabsTrigger value="pricing">Pricing</TabsTrigger>
+              <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Promo Tab */}
           <TabsContent value="promo" className="space-y-6">
