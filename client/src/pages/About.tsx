@@ -8,7 +8,7 @@ export default function About() {
     { number: "100+", label: "Bugs Fixed" },
     { number: "50+", label: "Happy Clients" },
     { number: "24-48hrs", label: "Average Fix Time" },
-    { number: "100%", label: "Nigeria-Based" },
+    { number: "25+", label: "Countries Served" },
   ];
 
   const whyChoose = [
@@ -19,8 +19,8 @@ export default function About() {
     },
     {
       icon: MapPin,
-      title: "Nigeria-Based",
-      desc: "Based right here in Nigeria, I understand local business needs and work in your timezone for quick communication."
+      title: "Global Reach",
+      desc: "Based in Nigeria, I serve clients worldwide with timezone flexibility and international experience."
     },
     {
       icon: Zap,
@@ -53,7 +53,7 @@ export default function About() {
             About OptiSolve Labs
           </h1>
           <p className="text-lg text-white/90" data-testid="text-about-subtitle">
-            Nigeria's trusted mobile frontend bug fixing specialist
+            Your global mobile frontend bug fixing specialist
           </p>
         </div>
       </section>
@@ -80,13 +80,13 @@ export default function About() {
               <h2 className="text-3xl sm:text-4xl font-bold mb-6">Why OptiSolve Labs?</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  I started OptiSolve Labs because I noticed too many Nigerian businesses losing customers due to simple mobile website bugs. A broken hamburger menu, a non-working WhatsApp button, or a contact form that doesn't send emails can cost you thousands of naira in lost sales every day.
+                  I started OptiSolve Labs because I noticed businesses worldwide losing customers due to simple mobile website bugs. A broken hamburger menu, a non-working WhatsApp button, or a contact form that doesn't send emails can cost you real money in lost sales every day.
                 </p>
                 <p>
-                  As a frontend developer specializing in mobile-first development, I've seen these problems countless times. That's why I decided to offer fast, affordable, and professional bug fixing services specifically for Nigerian businesses.
+                  As a frontend developer specializing in mobile-first development based in Nigeria, I've seen these problems countless times across clients globally. That's why I decided to offer fast, affordable, and professional bug fixing services to businesses and startups worldwide.
                 </p>
                 <p>
-                  I don't build entire websites - I focus exclusively on fixing mobile bugs quickly and efficiently. This specialization means I can solve your problem faster and more affordably than general web developers.
+                  I don't build entire websites - I focus exclusively on fixing mobile bugs quickly and efficiently. This specialization means I can solve your problem faster and more affordably than general web developers, no matter where you are.
                 </p>
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function About() {
               To help Nigerian businesses succeed online by ensuring their websites work perfectly on mobile devices. Every broken button or menu is a potential customer lost. I'm here to make sure you never lose another customer to a simple mobile bug.
             </p>
             <p>
-              Whether you're a small business owner in Lagos, a startup in Abuja, or an entrepreneur in Port Harcourt, I'm committed to providing fast, reliable, and affordable mobile bug fixing services.
+              Whether you're an e-commerce business, a SaaS startup, or a local service provider anywhere in the world, I'm committed to providing fast, reliable, and affordable mobile bug fixing services.
             </p>
           </div>
         </div>
