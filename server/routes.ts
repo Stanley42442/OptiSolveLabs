@@ -260,12 +260,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Unauthorized" });
       }
 
-      const validation = insertServiceImagesSchema.safeParse(req.body);
+      const serviceId = req.params.serviceId;
+      const validation = insertServiceImagesSchema.safeParse({
+        ...req.body,
+        serviceId,
+      });
       if (!validation.success) {
         return res.status(400).json({ error: "Invalid data" });
       }
 
-      const images = await storage.updateServiceImages(req.params.serviceId, validation.data);
+      const images = await storage.updateServiceImages(serviceId, validation.data);
       res.json(images);
     } catch (error) {
       res.status(500).json({ error: "Failed to update service images" });
@@ -334,8 +338,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Expected an array of pricing tiers" });
       }
 
-      const validated = req.body.map(tier => insertServicePricingSchema.parse(tier));
-      const pricing = await storage.updateServicePricing(req.params.serviceId, validated);
+      const serviceId = req.params.serviceId;
+      const validated = req.body.map(tier => insertServicePricingSchema.parse({
+        ...tier,
+        serviceId,
+        features: typeof tier.features === 'string' ? tier.features : tier.features.join('\n'),
+      }));
+      const pricing = await storage.updateServicePricing(serviceId, validated);
       res.json(pricing);
     } catch (error) {
       console.error("Error updating service pricing:", error);
